@@ -71,6 +71,10 @@ else:
 
 ext_modules = []
 
+# Set PYCVODES_NO_LAPACK='1' to avoid multiple define problems between
+# sundials/sundials_lapack.h and
+# external/anyode/include/anyode/anyode_blas_lapack.hpp with functions
+# (dgemv, dgbtrf, dgbtrs, dgetrf, and the 's' counterparts)
 if len(sys.argv) > 1 and '--help' not in sys.argv[1:] and sys.argv[1] not in (
         '--help-commands', 'egg_info', 'clean', '--version'):
     import numpy as np
@@ -83,6 +87,7 @@ if len(sys.argv) > 1 and '--help' not in sys.argv[1:] and sys.argv[1] not in (
         SUNDIALS_LIBS="",
     )
     for k, v in list(env.items()):
+        print('k: {}, v: {}'.format(k, v))
         env[k] = os.environ.get('%s_%s' % (pkg_name.upper(), k), v)
     _USE_KLU = env.get('NO_KLU', '0') == '0'
     if env.get('NO_LAPACK', '0') == '1' or env['LAPACK'] in ('', '0'):
@@ -110,6 +115,7 @@ if len(sys.argv) > 1 and '--help' not in sys.argv[1:] and sys.argv[1] not in (
                                    os.path.join('external', 'anyode', 'include')]
 
     ext_modules[0].define_macros += [
+        ("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"),
         ('PYCVODES_NO_KLU', '0' if _USE_KLU else '1'),
         ('PYCVODES_NO_LAPACK', '0' if _USE_LAPACK else '1'),
         ('ANYODE_NO_LAPACK', '0' if _USE_LAPACK else '1')
